@@ -13,7 +13,7 @@
 	<div class="container">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<h3 class="panel-title text-center">CADASTRO DE CLIENTE</h3>
+				<h3 class="panel-title text-center">CADASTRO DE CIDADES</h3>
 			</div>
 			
 			<div class="panel-body">
@@ -24,8 +24,8 @@
 						<div class="form-group">
 							<label for="uf" class="col-sm-2 control-label">Estado</label>
 							<div class="col-sm-4">
-								<select class="form-control" ng-model="idEstado"  name="idEstado" id="idEstado">
-									<option ng-repeat="estado in estados"  value="{{estado.id}}">{{estado.nome}}</option>
+								<select ng-change="bucasCidades()" class="form-control" ng-model="idEstado"  name="idEstado" id="idEstado">
+									<option  ng-repeat="estado in estados" ng-selected="estado.comboDefault"   ng-value="estado">{{estado.nome}}</option>
 								 
 								</select>
 							</div>
@@ -90,7 +90,7 @@
 								<td>{{cidade.populacao}}</td>
 								<td>{{cidade.custoPopulacional}}</td>
 								<td>
-									<a href="#" ng-click=" cadastrarCidade(cidade.id)" class="btn btn-danger">
+									<a href="#" ng-click=" excluir(cidade.id)" class="btn btn-danger">
 										<span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Excluir
 									</a>
 								</td>
@@ -119,7 +119,7 @@
 						<thead>
 							<tr>
 								<th>ID</th>
-								<th>ESTADO/th>
+								<th>ESTADO</th>
 								<th>CUSTO POPULACIONAL</th>
 								<th>CUSTO POPULACIONAL EM REAL</th>
 							</tr>
@@ -153,13 +153,13 @@
 
     app.controller('myCtrl', function($scope,$http ) {
 	
-		$scope.idEstado = "";
+	 
 		$scope.nome = "";
 		$scope.populacao = "";
 		$scope.cidades = [];
 		$scope.estados = [];
 		$scope.estadosCusto = [];
-  
+		$scope.idEstado = {}
  
    
      
@@ -167,16 +167,18 @@
      $scope.init = function() {
 
 
-		$scope.idEstado = "";
+		$scope.idEstado = {id:null};
 		$scope.nome = "";
 		$scope.populacao = "";
 		$scope.cidades = [];
 		$scope.estados = [];
 		$scope.estadosCusto = [];
-
+		
         $http.get("http://localhost:8080/v1/estado")
                 .then(function(response) {
                     $scope.estados = response.data;
+					$scope.idEstado = $scope.estados.filter((estado)=> { return estado.comboDefault== true})[0];
+				 console.log($scope.idEstado);
         });
 
 		$http.get("http://localhost:8080/v1/estado/custo")
@@ -184,14 +186,28 @@
                     $scope.estadosCusto = response.data;
         });
 
-		$http.get("http://localhost:8080/v1/estado/"+$scope.idEstado+"/cidades")
+		$http.get("http://localhost:8080/v1/estado/1/cidades")
                 .then(function(response) {
                     $scope.cidades = response.data;
         });
      };
 
+	 $scope.init();
+	 $scope.bucasCidades = function() {
 
-     $scope.init();
+
+		
+		$scope.nome = "";
+		$scope.populacao = "";
+
+		$http.get("http://localhost:8080/v1/estado/"+$scope.idEstado.id+"/cidades")
+				.then(function(response) {
+					$scope.cidades = response.data;
+		});
+	};
+
+
+     
 
         $scope.cadastrarCidade = function() {
           
@@ -201,6 +217,7 @@
                 .then(function(response) {
                      $scope.init();
                 });
+				
       
         };
 
