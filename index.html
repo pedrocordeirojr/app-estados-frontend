@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Estados/Cidade</title>
+	
+	<link rel="stylesheet" href="resources/css/bootstrap.min.css">
+</head>
+
+<body ng-app="myApp" ng-controller="myCtrl">
+	 
+	
+	<div class="container">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title text-center">CADASTRO DE CLIENTE</h3>
+			</div>
+			
+			<div class="panel-body">
+				
+				<form action="#" class="form-horizontal">
+					<fieldset>
+						<legend>Estado</legend>
+						<div class="form-group">
+							<label for="uf" class="col-sm-2 control-label">Estado</label>
+							<div class="col-sm-4">
+								<select class="form-control" ng-model="idEstado"  name="idEstado" id="idEstado">
+									<option ng-repeat="estado in estados"  value="{{estado.id}}">{{estado.nome}}</option>
+								 
+								</select>
+							</div>
+						</div>
+						 
+					</fieldset>
+					
+					<fieldset>
+						<legend>Cadastro de cidade</legend>
+						<div class="form-group">
+							<label for="nome" class="col-sm-2 control-label">Nome</label>
+							<div class="col-sm-12">
+								<input type="text" ng-model="nome" class="form-control" id="Nome">
+							</div>
+            </div>
+            <div class="form-group">
+							<label for="populacao" class="col-sm-2 control-label">População</label>
+							<div class="col-sm-12">
+								<input type="text" ng-model="populacao" class="form-control" id="populacao">
+							</div>
+						</div>
+						
+ 
+					</fieldset>
+					
+
+					
+					<button type="button" ng-click=" cadastrarCidade()"  class="btn btn-primary">
+						<span class="glyphicon glyphicon-floppy-disk" aria-hidden="true"></span> Gravar
+					</button>
+				</form>
+			</div>
+		</div>
+  </div>
+  
+  <div class="container">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title text-center">Cidades do estado selecionado</h3>
+			</div>
+			
+			<div class="panel-body">
+ 
+				
+				<div class="table-responsive">
+					<table class="table table-striped table-hover">
+						<thead>
+							<tr>
+								<th>ID</th>
+								<th>NOME</th>
+								<th>POPULAÇÃO</th>
+								<th>CUSTO POPULACIONAL</th>
+								<th>AÇÕES</th>
+							</tr>
+						</thead>
+
+						<tbody>
+
+							<tr ng-repeat="cidade in cidades"  >
+								<td>{{cidade.id}}</td>
+								<td>{{cidade.nome}}</td>
+								<td>{{cidade.populacao}}</td>
+								<td>{{cidade.custoPopulacional}}</td>
+								<td>
+									<a href="#" ng-click=" cadastrarCidade(cidade.id)" class="btn btn-danger">
+										<span class="glyphicon glyphicon-trash" aria-hidden="true"></span> Excluir
+									</a>
+								</td>
+							</tr>
+							
+						</tbody>
+					</table>
+				</div>
+			
+				 
+			</div>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title text-center">Cidades do estado selecionado</h3>
+			</div>
+			
+			<div class="panel-body">
+ 
+				
+				<div class="table-responsive">
+					<table class="table table-striped table-hover">
+						<thead>
+							<tr>
+								<th>ID</th>
+								<th>ESTADO/th>
+								<th>CUSTO POPULACIONAL</th>
+								<th>CUSTO POPULACIONAL EM REAL</th>
+							</tr>
+						</thead>
+
+						<tbody>
+
+							<tr ng-repeat="estado in estadosCusto"  >
+								<td>{{estado.id}}</td>
+								<td>{{estado.nome}}</td>
+								<td>{{estado.custoPopulacional}}</td>
+								<td>{{estado.custoPopulacionalEmReal}}</td>
+								
+							</tr>
+							
+						</tbody>
+					</table>
+				</div>
+			
+				 
+			</div>
+		</div>
+	</div>
+	
+	<script src="resources/js/jquery.min.js"></script>
+  <script src="resources/js/bootstrap.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular.min.js"></script>
+
+  <script>
+    var app = angular.module('myApp', []);
+
+    app.controller('myCtrl', function($scope,$http ) {
+	
+		$scope.idEstado = "";
+		$scope.nome = "";
+		$scope.populacao = "";
+		$scope.cidades = [];
+		$scope.estados = [];
+		$scope.estadosCusto = [];
+  
+ 
+   
+     
+        
+     $scope.init = function() {
+
+
+		$scope.idEstado = "";
+		$scope.nome = "";
+		$scope.populacao = "";
+		$scope.cidades = [];
+		$scope.estados = [];
+		$scope.estadosCusto = [];
+
+        $http.get("http://localhost:8080/v1/estado")
+                .then(function(response) {
+                    $scope.estados = response.data;
+        });
+
+		$http.get("http://localhost:8080/v1/estado/custo")
+                .then(function(response) {
+                    $scope.estadosCusto = response.data;
+        });
+
+		$http.get("http://localhost:8080/v1/estado/"+$scope.idEstado+"/cidades")
+                .then(function(response) {
+                    $scope.cidades = response.data;
+        });
+     };
+
+
+     $scope.init();
+
+        $scope.cadastrarCidade = function() {
+          
+      
+                $http.post("http://localhost:8080/v1/cidade",
+				{"idEstado":$scope.idEstado,"nome":$scope.nome,"populacao":$scope.populacao})
+                .then(function(response) {
+                     $scope.init();
+                });
+      
+        };
+
+		
+        $scope.excluir = function(id) {
+          
+      
+		  $http.delete("http://localhost:8080/v1/cidade/"+id)
+		  .then(function(response) {
+			   $scope.init();
+		  });
+
+  };
+       
+ 
+    });
+    </script>
+</body>
+</html>
